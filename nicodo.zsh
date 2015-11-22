@@ -11,6 +11,8 @@ nicodo() {
 
   tput clear
   tput reset
+  # Not to wrap output
+  printf '\033[?7l'
 
   request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=0&_limit=10&_context=apiguide'"
   query=$@
@@ -60,6 +62,8 @@ nicodo() {
         ;;
     esac
   done
+  # enable to wrap output
+  printf '\033[?7h'
   tput reset
   tput clear
 }
