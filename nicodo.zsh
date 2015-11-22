@@ -49,15 +49,15 @@ nicodo() {
     row=$((${pos[0]:2} - 1))
     case $char in
       j)
-        if [[ $row -lt $MAX_LINE ]]; then
+        if [[ $row -lt `expr $MAX_LINE - $LINES_PER_CONTENT` ]]; then
           # Move cursor down if not cursor on bottom
-          tput cud1
+          tput cud $LINES_PER_CONTENT
         fi
         ;;
       k)
         if [[ $row -gt 0 ]]; then
           # Move cursor up if not cursor on top
-          tput cuu1
+          tput cuu $LINES_PER_CONTENT
         fi
         ;;
       l)
@@ -84,12 +84,9 @@ nicodo() {
         tput cup $MAX_LINE 0
         ;;
       o)
-        if [[ `expr $row % $LINES_PER_CONTENT` != `expr $LINES_PER_CONTENT - 1` ]]; then
-          # if cursor not on list divider
-          content_id=$(echo $json_array | jq -r ".[`expr $row / $LINES_PER_CONTENT`] | .contentId")
-          url="$NICO_VIDEO_WATCH_URL$content_id"
-          open $url
-        fi
+        content_id=$(echo $json_array | jq -r ".[`expr $row / $LINES_PER_CONTENT`] | .contentId")
+        url="$NICO_VIDEO_WATCH_URL$content_id"
+        open $url
         ;;
       *)
         ;;
