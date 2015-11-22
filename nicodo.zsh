@@ -12,14 +12,14 @@ get_json_and_show() {
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
   echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
+  echo "Current page: `expr $current_page + 1`"
   tput cup 0 0
 }
 
 nicodo() {
   local line char query
   local -A opts
-  local url current_page next_page
-  local LIMIT MAX_LINE OFFSET
+  local url next_page
 
   tput clear
   tput reset
@@ -62,16 +62,16 @@ nicodo() {
         ;;
       l)
         next_page=`expr $current_page + 1`
+        current_page=`expr $current_page + 1`
         OFFSET=`expr $next_page \* $LIMIT`
         get_json_and_show
-        current_page=`expr $current_page + 1`
         ;;
       h)
         if [[ $current_page -gt 0 ]]; then
           prev_page=`expr $current_page - 1`
+          current_page=`expr $current_page - 1`
           OFFSET=`expr $prev_page \* $LIMIT`
           get_json_and_show
-          current_page=`expr $current_page - 1`
         fi
         ;;
       q)
