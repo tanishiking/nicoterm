@@ -80,6 +80,9 @@ nicodo() {
       g)
         tput cup 0 0
         ;;
+      G)
+        tput cup $MAX_LINE 0
+        ;;
       o)
         if [[ `expr $row % $LINES_PER_CONTENT` != `expr $LINES_PER_CONTENT - 1` ]]; then
           # if cursor not on list divider
