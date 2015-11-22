@@ -12,7 +12,7 @@ get_json_and_show() {
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
   echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
-  echo "Current page: `expr $current_page + 1`"
+  echo "Current page: `expr $current_page + 1` || Query: $query"
   tput cup 0 0
 }
 
@@ -26,7 +26,7 @@ nicodo() {
   # Not to wrap output
   printf '\033[?7l'
 
-  SCREEN_LINES=$(tput lines)
+  SCREEN_LINES=`expr $(tput lines) - 1`
   LIMIT=`expr $SCREEN_LINES / $LINES_PER_CONTENT`
   MAX_LINE=`expr $LINES_PER_CONTENT \* $LIMIT - 1`
 
