@@ -16,7 +16,7 @@ get_json_and_show() {
 }
 
 nicodo() {
-  local line max_line char query
+  local line char query
   local -A opts
   local url current_page next_page
   local LIMIT MAX_LINE OFFSET
@@ -53,14 +53,12 @@ nicodo() {
           # Move cursor down if not cursor on bottom
           tput cud1
         fi
-        continue
         ;;
       k)
         if [[ $row -gt 0 ]]; then
           # Move cursor up if not cursor on top
           tput cuu1
         fi
-        continue
         ;;
       l)
         next_page=`expr $current_page + 1`
@@ -81,7 +79,6 @@ nicodo() {
         ;;
       g)
         tput cup 0 0
-        continue
         ;;
       o)
         if [[ `expr $row % $LINES_PER_CONTENT` != `expr $LINES_PER_CONTENT - 1` ]]; then
@@ -90,10 +87,8 @@ nicodo() {
           url="$NICO_VIDEO_WATCH_URL$content_id"
           open $url
         fi
-        continue
         ;;
       *)
-        continue
         ;;
     esac
   done
