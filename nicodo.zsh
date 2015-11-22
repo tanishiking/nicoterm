@@ -4,6 +4,8 @@
 NICO_VIDEO_API_URL='http://api.search.nicovideo.jp/api/v2/video/contents/search'
 NICO_VIDEO_WATCH_URL='http://www.nicovideo.jp/watch/'
 LINES_PER_CONTENT=3
+LIMIT=10
+MAX_LINE=`expr $LINES_PER_CONTENT \* $LIMIT - 1`
 
 nicodo() {
   local line max_line char query
@@ -16,8 +18,8 @@ nicodo() {
   # Not to wrap output
   printf '\033[?7l'
 
-  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=0&_limit=10&_context=nicodo.zsh'"
   query=$@
+  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=0&_limit=10&_context=nicodo.zsh'"
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
   echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
@@ -36,7 +38,10 @@ nicodo() {
     row=$((${pos[0]:2} - 1))
     case $char in
       j)
-        tput cud1
+        if [[ $row -lt $MAX_LINE ]]; then
+          # Move cursor down if not cursor on bottom
+          tput cud1
+        fi
         continue
         ;;
       k)
