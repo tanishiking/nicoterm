@@ -15,7 +15,7 @@ nicodo() {
   # Not to wrap output
   printf '\033[?7l'
 
-  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=0&_limit=10&_context=apiguide'"
+  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=0&_limit=10&_context=nicodo.zsh'"
   query=$@
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
