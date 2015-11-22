@@ -3,6 +3,7 @@
 
 NICO_VIDEO_API_URL='http://api.search.nicovideo.jp/api/v2/video/contents/search'
 NICO_VIDEO_WATCH_URL='http://www.nicovideo.jp/watch/'
+LINES_PER_CONTENT=3
 
 nicodo() {
   local line max_line char query
@@ -22,15 +23,27 @@ nicodo() {
   echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
   tput cup 0 0
 
-  while IFS= read -r -n1 -s char
-  do
+  while IFS= read -r -n1 -s char; do
+    exec < /dev/tty
+    oldstty=$(stty -g)
+    stty raw -echo min 0
+    tput sc
+    echo '\033[6n' > /dev/tty
+    tput rc
+    # tput u7 > /dev/tty    # when TERM=xterm (and relatives)
+    IFS=';' read -r -d R -a pos
+    stty $oldstty
+    row=$((${pos[0]:2} - 1))
     case $char in
       j)
         tput cud1
         continue
         ;;
       k)
-        tput cuu1
+        if [[ $row -gt 0 ]]; then
+          # Move cursor up if not cursor on top
+          tput cuu1
+        fi
         continue
         ;;
       q)
@@ -41,19 +54,9 @@ nicodo() {
         continue
         ;;
       o)
-        exec < /dev/tty
-        oldstty=$(stty -g)
-        stty raw -echo min 0
-        tput sc
-        echo '\033[6n' > /dev/tty
-        tput rc
-        # tput u7 > /dev/tty    # when TERM=xterm (and relatives)
-        IFS=';' read -r -d R -a pos
-        stty $oldstty
-        row=$((${pos[0]:2} - 1))
-        if [[ `expr $row % 3` != 2 ]]; then
+        if [[ `expr $row % $LINES_PER_CONTENT` != `expr $LINES_PER_CONTENT - 1` ]]; then
           # if cursor not on list divider
-          content_id=$(echo $json_array | jq -r ".[`expr $row / 3`] | .contentId")
+          content_id=$(echo $json_array | jq -r ".[`expr $row / $LINES_PER_CONTENT`] | .contentId")
           url="$NICO_VIDEO_WATCH_URL$content_id"
           open $url
         fi
