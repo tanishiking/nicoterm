@@ -9,8 +9,8 @@ nicodo() {
   local line max_line char query
   local request_command
   local -A opts
-  local url
-  local LIMIT MAX_LINE
+  local url current_page next_page
+  local LIMIT MAX_LINE OFFSET
 
   tput clear
   tput reset
@@ -21,8 +21,11 @@ nicodo() {
   LIMIT=`expr $SCREEN_LINES / $LINES_PER_CONTENT`
   MAX_LINE=`expr $LINES_PER_CONTENT \* $LIMIT - 1`
 
+  current_page=0
+  OFFSET=0
+
   query=$@
-  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=0&_limit=$LIMIT&_context=nicodo.zsh'"
+  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=$OFFSET&_limit=$LIMIT&_context=nicodo.zsh'"
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
   echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
@@ -53,6 +56,30 @@ nicodo() {
           tput cuu1
         fi
         continue
+        ;;
+      l)
+        tput clear
+        next_page=`expr $current_page + 1`
+        OFFSET=`expr $next_page \* $LIMIT`
+        request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=$OFFSET&_limit=$LIMIT&_context=nicodo.zsh'"
+        request_command="$request_command --data-urlencode q=$query"
+        json_array=$(eval $request_command | jq '.data')
+        echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
+        tput cup 0 0
+        current_page=`expr $current_page + 1`
+        ;;
+      h)
+        if [[ $current_page -gt 0 ]]; then
+          tput clear
+          prev_page=`expr $current_page - 1`
+          OFFSET=`expr $prev_page \* $LIMIT`
+          request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=$OFFSET&_limit=$LIMIT&_context=nicodo.zsh'"
+          request_command="$request_command --data-urlencode q=$query"
+          json_array=$(eval $request_command | jq '.data')
+          echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
+          tput cup 0 0
+          current_page=`expr $current_page - 1`
+        fi
         ;;
       q)
         break
