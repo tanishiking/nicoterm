@@ -5,9 +5,18 @@ NICO_VIDEO_API_URL='http://api.search.nicovideo.jp/api/v2/video/contents/search'
 NICO_VIDEO_WATCH_URL='http://www.nicovideo.jp/watch/'
 LINES_PER_CONTENT=3
 
+get_json_and_show() {
+  local request_command
+  tput clear
+  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=$OFFSET&_limit=$LIMIT&_context=nicodo.zsh'"
+  request_command="$request_command --data-urlencode q=$query"
+  json_array=$(eval $request_command | jq '.data')
+  echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
+  tput cup 0 0
+}
+
 nicodo() {
   local line max_line char query
-  local request_command
   local -A opts
   local url current_page next_page
   local LIMIT MAX_LINE OFFSET
@@ -25,11 +34,7 @@ nicodo() {
   OFFSET=0
 
   query=$@
-  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=$OFFSET&_limit=$LIMIT&_context=nicodo.zsh'"
-  request_command="$request_command --data-urlencode q=$query"
-  json_array=$(eval $request_command | jq '.data')
-  echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
-  tput cup 0 0
+  get_json_and_show
 
   while IFS= read -r -n1 -s char; do
     exec < /dev/tty
@@ -58,26 +63,16 @@ nicodo() {
         continue
         ;;
       l)
-        tput clear
         next_page=`expr $current_page + 1`
         OFFSET=`expr $next_page \* $LIMIT`
-        request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=$OFFSET&_limit=$LIMIT&_context=nicodo.zsh'"
-        request_command="$request_command --data-urlencode q=$query"
-        json_array=$(eval $request_command | jq '.data')
-        echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
-        tput cup 0 0
+        get_json_and_show
         current_page=`expr $current_page + 1`
         ;;
       h)
         if [[ $current_page -gt 0 ]]; then
-          tput clear
           prev_page=`expr $current_page - 1`
           OFFSET=`expr $prev_page \* $LIMIT`
-          request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=$OFFSET&_limit=$LIMIT&_context=nicodo.zsh'"
-          request_command="$request_command --data-urlencode q=$query"
-          json_array=$(eval $request_command | jq '.data')
-          echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
-          tput cup 0 0
+          get_json_and_show
           current_page=`expr $current_page - 1`
         fi
         ;;
