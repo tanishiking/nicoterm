@@ -1,4 +1,5 @@
 # Requirements curl jq
+# TODO: Refactoring
 
 NICO_VIDEO_API_URL='http://api.search.nicovideo.jp/api/v2/video/contents/search'
 NICO_VIDEO_WATCH_URL='http://www.nicovideo.jp/watch/'
@@ -18,9 +19,8 @@ nicodo() {
   query=$@
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
-  echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)"'
+  echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
   tput cup 0 0
-  max_line=$(tput lines)
 
   while IFS= read -r -n1 -s char
   do
@@ -44,7 +44,6 @@ nicodo() {
         exec < /dev/tty
         oldstty=$(stty -g)
         stty raw -echo min 0
-        # on my system, the following line can be replaced by the line below it
         tput sc
         echo '\033[6n' > /dev/tty
         tput rc
@@ -52,9 +51,12 @@ nicodo() {
         IFS=';' read -r -d R -a pos
         stty $oldstty
         row=$((${pos[0]:2} - 1))
-        content_id=$(echo $json_array | jq -r ".[$row] | .contentId")
-        url="$NICO_VIDEO_WATCH_URL$content_id"
-        open $url
+        if [[ `expr $row % 3` != 2 ]]; then
+          # if cursor not on list divider
+          content_id=$(echo $json_array | jq -r ".[`expr $row / 3`] | .contentId")
+          url="$NICO_VIDEO_WATCH_URL$content_id"
+          open $url
+        fi
         continue
         ;;
       *)
