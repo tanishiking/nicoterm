@@ -4,22 +4,25 @@
 NICO_VIDEO_API_URL='http://api.search.nicovideo.jp/api/v2/video/contents/search'
 NICO_VIDEO_WATCH_URL='http://www.nicovideo.jp/watch/'
 LINES_PER_CONTENT=3
-LIMIT=10
-MAX_LINE=`expr $LINES_PER_CONTENT \* $LIMIT - 1`
 
 nicodo() {
   local line max_line char query
   local request_command
   local -A opts
   local url
+  local LIMIT MAX_LINE
 
   tput clear
   tput reset
   # Not to wrap output
   printf '\033[?7l'
 
+  SCREEN_LINES=$(tput lines)
+  LIMIT=`expr $SCREEN_LINES / $LINES_PER_CONTENT`
+  MAX_LINE=`expr $LINES_PER_CONTENT \* $LIMIT - 1`
+
   query=$@
-  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=0&_limit=10&_context=nicodo.zsh'"
+  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=0&_limit=$LIMIT&_context=nicodo.zsh'"
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
   echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
