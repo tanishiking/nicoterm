@@ -9,15 +9,20 @@ LIMIT=`expr $SCREEN_LINES / $LINES_PER_CONTENT`
 MAX_LINE=`expr $LINES_PER_CONTENT \* $LIMIT - $LINES_PER_CONTENT`
 DISABLE_WRAP='\033[?7l'
 ENABLE_WRAP='\033[?7h'
+DIVIDER='----------------------------------------------------------'
 
 function get_jsonarray() {
   local offset=$1
   local query=$2
-  local request_command
+  local request_command content_id description
   request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=$offset&_limit=$LIMIT&_context=nicoterm'"
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
-  echo $json_array | jq -r '.[] | "\(.contentId)\t\(.title)\n\(.description)\n--------------------------------"'
+  echo $json_array | jq -r '.[] | .title, .description' | \
+    while IFS= read -r title
+               read -r description; do
+      echo "$title\n$description\n$DIVIDER"
+    done
 }
 
 function show_footer() {
