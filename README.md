@@ -1,2 +1,2 @@
-# nicodo.zsh
-Search niconico video from zsh
+# nicoterm
+Search niconico video from terminal
