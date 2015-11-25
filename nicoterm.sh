@@ -36,8 +36,10 @@ function show_page() {
   local current_page=$2
   local offset=`expr $current_page \* $LIMIT`
   tput clear
+  printf $DISABLE_WRAP
   get_jsonarray $offset $query
   show_footer $current_page $query
+  printf $ENABLE_WRAP
   tput cup 0 0
 }
 
@@ -65,11 +67,7 @@ function nicodo() {
 
   tput clear
   tput reset
-  # Not to wrap output
-  printf $DISABLE_WRAP
-
   show_page $query $current_page
-
   while IFS= read -r -n1 -s char; do
     case $char in
       j)
@@ -118,7 +116,6 @@ function nicodo() {
         ;;
     esac
   done
-  printf $ENABLE_WRAP
   tput reset
   tput clear
 }
