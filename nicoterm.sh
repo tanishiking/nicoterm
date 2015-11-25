@@ -16,9 +16,24 @@ get_json_and_show() {
   tput cup 0 0
 }
 
+open_url() {
+  url=$1
+  if which xdg-open > /dev/null; then
+    xdg-open $url
+  elif which gnome-open > /dev/null; then
+    gnome-open $url
+  elif which open > /dev/null; then
+    open $url
+  else
+    tput reset
+    tput clear
+    echo "Cannot detect (xdg-open | gnome-open | open) command" 1>&2
+    exit 1
+  fi
+}
+
 nicodo() {
   local line char query
-  local -A opts
   local url next_page
 
   tput clear
@@ -86,7 +101,7 @@ nicodo() {
       o)
         content_id=$(echo $json_array | jq -r ".[`expr $row / $LINES_PER_CONTENT`] | .contentId")
         url="$NICO_VIDEO_WATCH_URL$content_id"
-        open $url
+        open_url $url
         ;;
       *)
         ;;
