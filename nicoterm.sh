@@ -98,7 +98,7 @@ function nicodo() {
         shift 1
         ;;
       -*)
-        echo "$PROGNAME: illegal option -- '$(echo $1 | sed 's/^-*//')'" 1>&2
+        echo "$0: illegal option -- '$(echo $1 | sed 's/^-*//')'" 1>&2
         exit 1
         ;;
       *)
