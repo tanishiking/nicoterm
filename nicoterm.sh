@@ -1,6 +1,6 @@
 # Requirements curl jq
-# TODO: Refactoring
 
+APP_NAME='nicoterm'
 NICO_VIDEO_API_URL='http://api.search.nicovideo.jp/api/v2/video/contents/search'
 NICO_VIDEO_WATCH_URL='http://www.nicovideo.jp/watch/'
 LINES_PER_CONTENT=4
@@ -20,7 +20,7 @@ function get_jsonarray() {
   local offset=$1
   local query=$2
   local request_command content_id description view_counter
-  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=$TARGETS&fields=$FIELDS&_sort=$ORDER&_offset=$offset&_limit=$LIMIT&_context=nicoterm'"
+  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=$TARGETS&fields=$FIELDS&_sort=$ORDER&_offset=$offset&_limit=$LIMIT&_context=$APP_NAME'"
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
   echo $json_array | jq -r '.[] | .title, .description, .viewCounter, .mylistCounter, .commentCounter' | \
