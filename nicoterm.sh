@@ -1,3 +1,4 @@
+#!/bin/bash
 # Requirements curl jq
 
 APP_NAME='NICOTERM'
@@ -42,8 +43,8 @@ function get_jsonarray() {
       tput sgr0
       printf "再生数:$view_counter\t"
       printf "ﾏｲﾘｽﾄ数:$mylist_counter\t"
-      printf "ｺﾒﾝﾄ数:$comment_counter"
-      echo "\n"
+      printf "ｺﾒﾝﾄ数:$comment_counter\n"
+      printf "\n"
     done
 }
 
