@@ -6,10 +6,10 @@ NICO_VIDEO_API_URL='http://api.search.nicovideo.jp/api/v2/video/contents/search'
 NICO_VIDEO_WATCH_URL='http://www.nicovideo.jp/watch/'
 LINES_PER_CONTENT=4
 TOP_LINE=1
-SCREEN_LINES=`expr $(tput lines) - 2`
+SCREEN_LINES=`expr $(tput lines) - 3`
 SCREEN_COLS=$(tput cols)
 LIMIT=`expr $SCREEN_LINES / $LINES_PER_CONTENT`
-MAX_LINE=`expr $LINES_PER_CONTENT \* $LIMIT - $LINES_PER_CONTENT`
+MAX_LINE=`expr $LINES_PER_CONTENT \* $LIMIT - $LINES_PER_CONTENT + $TOP_LINE`
 DISABLE_WRAP='\033[?7l'
 ENABLE_WRAP='\033[?7h'
 TARGETS='title,description,tags'
@@ -34,14 +34,13 @@ function get_jsonarray() {
                read -r view_counter
                read -r mylist_counter
                read -r comment_counter; do
+      printf " "
       tput bold
       tput smul
       echo "$title"
       tput sgr0
-      tput setaf 8
-      echo "$description"
-      tput sgr0
-      printf "再生数:$view_counter\t"
+      echo " $description"
+      printf " 再生数:$view_counter\t"
       printf "ﾏｲﾘｽﾄ数:$mylist_counter\t"
       printf "ｺﾒﾝﾄ数:$comment_counter\n"
       printf "\n"
@@ -77,6 +76,10 @@ function show_footer() {
   tput setab 4
   tput setaf 7
   printf " Current page: `expr $current_page + 1` || Query: $query"
+  print_spaces $SCREEN_COLS
+  printf "\n"
+  tput setab 3
+  printf " o:open_video j:down k:up l:next h:prev g:top G:bottom q:quit"
   print_spaces $SCREEN_COLS
   tput sgr0
 }
@@ -160,7 +163,7 @@ function nicodo() {
   while IFS= read -r -n1 -s char; do
     case $char in
       j)
-        if [[ $cursor_pos -lt $MAX_LINE ]]; then
+        if [[ $cursor_pos -lt `expr $MAX_LINE - $LINES_PER_CONTENT` ]]; then
           # Move cursor down if not cursor on bottom
           cursor_pos=`expr $cursor_pos + $LINES_PER_CONTENT`
           tput cud $LINES_PER_CONTENT
