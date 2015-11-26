@@ -14,6 +14,7 @@ FIELDS='contentId,title,viewCounter,mylistCounter,commentCounter,description'
 ORDER_BY_MYLIST='-mylistCounter'
 ORDER_BY_VIEW='-viewCounter'
 ORDER_BY_COMMENT='-commentCounter'
+ORDER_BY_DATE='-startTime'
 ORDER=$ORDER_BY_MYLIST
 
 function get_jsonarray() {
@@ -74,7 +75,7 @@ function open_url() {
 function nicodo() {
   local current_page=0
   local cursor_pos=0
-  local content_id url query
+  local content_id url query opt
 
   if [[ $# -eq 0 ]]; then
     show_usage
@@ -96,6 +97,10 @@ function nicodo() {
         ;;
       '-om'|'--order-by-mylist')
         ORDER=$ORDER_BY_MYLIST
+        shift 1
+        ;;
+      '-oa'|'--order-by-arrival-date')
+        ORDER=$ORDER_BY_DATE
         shift 1
         ;;
       -*)
@@ -177,6 +182,8 @@ function show_usage() {
   echo "    Order search results by comment counter desc"
   echo "  --order-by-view, -ov"
   echo "    Order search results by view counter desc"
+  echo "  --order-by-arrival-date, -oa"
+  echo "    Order search results by arrival date"
 }
 
 nicodo $@
