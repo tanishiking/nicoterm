@@ -163,14 +163,14 @@ function nicodo() {
   while IFS= read -r -n1 -s char; do
     case $char in
       j)
-        if [[ $cursor_pos -lt `expr $MAX_LINE - $LINES_PER_CONTENT` ]]; then
+        if [[ $cursor_pos -le `expr $MAX_LINE - $LINES_PER_CONTENT` ]]; then
           # Move cursor down if not cursor on bottom
           cursor_pos=`expr $cursor_pos + $LINES_PER_CONTENT`
           tput cud $LINES_PER_CONTENT
         fi
         ;;
       k)
-        if [[ $cursor_pos -gt 0 ]]; then
+        if [[ $cursor_pos -gt $TOP_LINE ]]; then
           # Move cursor up if not cursor on top
           cursor_pos=`expr $cursor_pos - $LINES_PER_CONTENT`
           tput cuu $LINES_PER_CONTENT
