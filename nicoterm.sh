@@ -3,13 +3,13 @@
 
 NICO_VIDEO_API_URL='http://api.search.nicovideo.jp/api/v2/video/contents/search'
 NICO_VIDEO_WATCH_URL='http://www.nicovideo.jp/watch/'
-LINES_PER_CONTENT=3
+LINES_PER_CONTENT=4
 SCREEN_LINES=`expr $(tput lines) - 1`
 LIMIT=`expr $SCREEN_LINES / $LINES_PER_CONTENT`
 MAX_LINE=`expr $LINES_PER_CONTENT \* $LIMIT - $LINES_PER_CONTENT`
 DISABLE_WRAP='\033[?7l'
 ENABLE_WRAP='\033[?7h'
-DIVIDER='----------------------------------------------------------'
+TARGETS='title,description,tags'
 ORDER_BY_MYLIST='-mylistCounter'
 ORDER_BY_VIEW='-viewCounter'
 ORDER_BY_COMMENT='-commentCounter'
@@ -18,14 +18,19 @@ ORDER=$ORDER_BY_MYLIST
 function get_jsonarray() {
   local offset=$1
   local query=$2
-  local request_command content_id description
-  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=$ORDER&_offset=$offset&_limit=$LIMIT&_context=nicoterm'"
+  local request_command content_id description view_counter
+  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=$TARGETS&fields=contentId,title,viewCounter,mylistCounter,description&_sort=$ORDER&_offset=$offset&_limit=$LIMIT&_context=nicoterm'"
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
-  echo $json_array | jq -r '.[] | .title, .description' | \
+  echo $json_array | jq -r '.[] | .title, .description, .viewCounter, .mylistCounter' | \
     while IFS= read -r title
-               read -r description; do
-      echo "$title\n$description\n$DIVIDER"
+               read -r description
+               read -r view_counter
+               read -r mylist_counter; do
+      echo "$title"
+      echo "$description"
+      echo "再生数:$view_counter\tﾏｲﾘｽﾄ数:$mylist_counter"
+      echo
     done
 }
 
@@ -78,16 +83,16 @@ function nicodo() {
         show_usage
         exit 0
         ;;
-      '-kc'|'--key-comment')
+      '-oc'|'--order-by-comment')
         ORDER=$ORDER_BY_COMMENT
         shift 1
         ;;
-      '-kv'|'--key-view')
+      '-ov'|'--order-by-view')
         ORDER=$ORDER_BY_VIEW
         shift 1
         ;;
-      '-km'|'--key-mylist')
-        ORDER=$ORDER_BY_VIEW
+      '-om'|'--order-by-mylist')
+        ORDER=$ORDER_BY_MYLIST
         shift 1
         ;;
       -*)
@@ -159,6 +164,16 @@ function nicodo() {
 
 function show_usage() {
   echo "Usage: $0 [OPTIONS] query"
+  echo
+  echo "OPTIONS:"
+  echo "  --help, -h"
+  echo "    Show help"
+  echo "  --order-by-mylist, -om"
+  echo "    Order search results by mylist counter desc (default)"
+  echo "  --order-by-comment, -oc"
+  echo "    Order search results by comment counter desc"
+  echo "  --order-by-view, -ov"
+  echo "    Order search results by view counter desc"
 }
 
 nicodo $@
