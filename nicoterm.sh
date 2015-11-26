@@ -1,10 +1,12 @@
 # Requirements curl jq
 
-APP_NAME='nicoterm'
+APP_NAME='NICOTERM'
 NICO_VIDEO_API_URL='http://api.search.nicovideo.jp/api/v2/video/contents/search'
 NICO_VIDEO_WATCH_URL='http://www.nicovideo.jp/watch/'
 LINES_PER_CONTENT=4
-SCREEN_LINES=`expr $(tput lines) - 1`
+TOP_LINE=1
+SCREEN_LINES=`expr $(tput lines) - 2`
+SCREEN_COLS=$(tput cols)
 LIMIT=`expr $SCREEN_LINES / $LINES_PER_CONTENT`
 MAX_LINE=`expr $LINES_PER_CONTENT \* $LIMIT - $LINES_PER_CONTENT`
 DISABLE_WRAP='\033[?7l'
@@ -31,17 +33,51 @@ function get_jsonarray() {
                read -r view_counter
                read -r mylist_counter
                read -r comment_counter; do
+      tput bold
+      tput smul
       echo "$title"
+      tput sgr0
+      tput setaf 8
       echo "$description"
-      echo "再生数:$view_counter\tﾏｲﾘｽﾄ数:$mylist_counter\tｺﾒﾝﾄ数:$comment_counter"
-      echo
+      tput sgr0
+      printf "再生数:$view_counter\t"
+      printf "ﾏｲﾘｽﾄ数:$mylist_counter\t"
+      printf "ｺﾒﾝﾄ数:$comment_counter"
+      echo "\n"
     done
+}
+
+function print_spaces() {
+  local num_of_spaces=$1
+  local i=0
+  while [[ $i -lt $num_of_spaces ]]; do
+    printf ' '
+    i=`expr $i + 1`
+  done
+}
+
+function show_header() {
+  local header_contents="$APP_NAME"
+  local header_length=${#header_contents}
+  local half_screen_cols=`expr $SCREEN_COLS / 2`
+  local spaces=`expr $half_screen_cols - $header_length / 2`
+  tput setab 5
+  tput setaf 7
+  print_spaces $spaces
+  printf "$header_contents"
+  print_spaces $spaces
+  tput sgr0
 }
 
 function show_footer() {
   local current_page=$1
   local query=$2
-  echo "Current page: `expr $current_page + 1` || Query: $query"
+  tput bold
+  tput setab 4
+  tput setaf 7
+  printf " Current page: `expr $current_page + 1` || Query: $query"
+  print_spaces $SCREEN_COLS
+  tput sgr0
 }
 
 function show_page() {
@@ -50,10 +86,12 @@ function show_page() {
   local offset=`expr $current_page \* $LIMIT`
   tput clear
   printf $DISABLE_WRAP
+  show_header
+  tput cud1
   get_jsonarray $offset $query
   show_footer $current_page $query
   printf $ENABLE_WRAP
-  tput cup 0 0
+  tput cup $TOP_LINE 0
 }
 
 function open_url() {
@@ -151,7 +189,7 @@ function nicodo() {
         ;;
       g)
         cursor_pos=0
-        tput cup 0 0
+        tput cup $TOP_LINE 0
         ;;
       G)
         cursor_pos=$MAX_LINE
