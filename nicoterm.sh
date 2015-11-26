@@ -20,6 +20,7 @@ function get_jsonarray() {
   local offset=$1
   local query=$2
   local request_command content_id description view_counter
+  local comment_counter
   request_command="curl --silent '$NICO_VIDEO_API_URL?targets=$TARGETS&fields=$FIELDS&_sort=$ORDER&_offset=$offset&_limit=$LIMIT&_context=$APP_NAME'"
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
