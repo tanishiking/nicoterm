@@ -10,12 +10,16 @@ MAX_LINE=`expr $LINES_PER_CONTENT \* $LIMIT - $LINES_PER_CONTENT`
 DISABLE_WRAP='\033[?7l'
 ENABLE_WRAP='\033[?7h'
 DIVIDER='----------------------------------------------------------'
+ORDER_BY_MYLIST='-mylistCounter'
+ORDER_BY_VIEW='-viewCounter'
+ORDER_BY_COMMENT='-commentCounter'
+ORDER=$ORDER_BY_MYLIST
 
 function get_jsonarray() {
   local offset=$1
   local query=$2
   local request_command content_id description
-  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=-viewCounter&_offset=$offset&_limit=$LIMIT&_context=nicoterm'"
+  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=title&fields=contentId,title,viewCounter,description&_sort=$ORDER&_offset=$offset&_limit=$LIMIT&_context=nicoterm'"
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
   echo $json_array | jq -r '.[] | .title, .description' | \
@@ -60,10 +64,43 @@ function open_url() {
 }
 
 function nicodo() {
-  local query=$@
   local current_page=0
   local cursor_pos=0
-  local content_id url
+  local content_id url query
+
+  if [[ $# -eq 0 ]]; then
+    show_usage
+    exit 0
+  fi
+  for opt in "$@"; do
+    case "$opt" in
+      '-h'|'--help')
+        show_usage
+        exit 0
+        ;;
+      '-kc'|'--key-comment')
+        ORDER=$ORDER_BY_COMMENT
+        shift 1
+        ;;
+      '-kv'|'--key-view')
+        ORDER=$ORDER_BY_VIEW
+        shift 1
+        ;;
+      '-km'|'--key-mylist')
+        ORDER=$ORDER_BY_VIEW
+        shift 1
+        ;;
+      -*)
+        echo "$PROGNAME: illegal option -- '$(echo $1 | sed 's/^-*//')'" 1>&2
+        exit 1
+        ;;
+      *)
+        if [[ ! -z "@1" ]] && [[ ! "&1" =~ ^-+ ]]; then
+          query=$1
+          shift 1
+        fi
+    esac
+  done
 
   tput clear
   tput reset
@@ -118,6 +155,10 @@ function nicodo() {
   done
   tput reset
   tput clear
+}
+
+function show_usage() {
+  echo "Usage: $0 [OPTIONS] query"
 }
 
 nicodo $@
