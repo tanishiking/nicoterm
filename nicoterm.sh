@@ -10,6 +10,7 @@ MAX_LINE=`expr $LINES_PER_CONTENT \* $LIMIT - $LINES_PER_CONTENT`
 DISABLE_WRAP='\033[?7l'
 ENABLE_WRAP='\033[?7h'
 TARGETS='title,description,tags'
+FIELDS='contentId,title,viewCounter,mylistCounter,commentCounter,description'
 ORDER_BY_MYLIST='-mylistCounter'
 ORDER_BY_VIEW='-viewCounter'
 ORDER_BY_COMMENT='-commentCounter'
@@ -19,17 +20,18 @@ function get_jsonarray() {
   local offset=$1
   local query=$2
   local request_command content_id description view_counter
-  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=$TARGETS&fields=contentId,title,viewCounter,mylistCounter,description&_sort=$ORDER&_offset=$offset&_limit=$LIMIT&_context=nicoterm'"
+  request_command="curl --silent '$NICO_VIDEO_API_URL?targets=$TARGETS&fields=$FIELDS&_sort=$ORDER&_offset=$offset&_limit=$LIMIT&_context=nicoterm'"
   request_command="$request_command --data-urlencode q=$query"
   json_array=$(eval $request_command | jq '.data')
-  echo $json_array | jq -r '.[] | .title, .description, .viewCounter, .mylistCounter' | \
+  echo $json_array | jq -r '.[] | .title, .description, .viewCounter, .mylistCounter, .commentCounter' | \
     while IFS= read -r title
                read -r description
                read -r view_counter
-               read -r mylist_counter; do
+               read -r mylist_counter
+               read -r comment_counter; do
       echo "$title"
       echo "$description"
-      echo "再生数:$view_counter\tﾏｲﾘｽﾄ数:$mylist_counter"
+      echo "再生数:$view_counter\tﾏｲﾘｽﾄ数:$mylist_counter\tｺﾒﾝﾄ数:$comment_counter"
       echo
     done
 }
