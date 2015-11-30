@@ -129,19 +129,19 @@ function nicodo() {
         show_usage
         exit 0
         ;;
-      '-oc'|'--order-by-comment')
+      '-c'|'--order-by-comment')
         ORDER=$ORDER_BY_COMMENT
         shift 1
         ;;
-      '-ov'|'--order-by-view')
+      '-v'|'--order-by-view')
         ORDER=$ORDER_BY_VIEW
         shift 1
         ;;
-      '-om'|'--order-by-mylist')
+      '-m'|'--order-by-mylist')
         ORDER=$ORDER_BY_MYLIST
         shift 1
         ;;
-      '-oa'|'--order-by-arrival-date')
+      '-a'|'--order-by-arrival-date')
         ORDER=$ORDER_BY_DATE
         shift 1
         ;;
@@ -218,13 +218,13 @@ function show_usage() {
   echo "OPTIONS:"
   echo "  --help, -h"
   echo "    Show help"
-  echo "  --order-by-mylist, -om"
+  echo "  --order-by-mylist, -m"
   echo "    Order search results by mylist counter desc (default)"
-  echo "  --order-by-comment, -oc"
+  echo "  --order-by-comment, -c"
   echo "    Order search results by comment counter desc"
-  echo "  --order-by-view, -ov"
+  echo "  --order-by-view, -v"
   echo "    Order search results by view counter desc"
-  echo "  --order-by-arrival-date, -oa"
+  echo "  --order-by-arrival-date, -a"
   echo "    Order search results by arrival date"
 }
 
