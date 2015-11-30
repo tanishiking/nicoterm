@@ -26,10 +26,10 @@ OPTIONS:
     Order search results by arrival date
 ```
 
-- j: cursor down
-- k: cursor up
-- l: go to next page
-- h: go to prev page
+- j|C-n: cursor down
+- k|C-p: cursor up
+- l|C-b: go to next page
+- h|C-f: go to prev page
 - g: move cursor to top
 - G: move cursor to bottom
 - o: open cursor video

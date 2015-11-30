@@ -79,7 +79,7 @@ function show_footer() {
   print_spaces $SCREEN_COLS
   printf "\n"
   tput setab 3
-  printf " o:open_video j:down k:up l:next h:prev g:top G:bottom q:quit"
+  printf " o:open_video q:quit j|C-n:down k|C-p:up l|C-b:next h|C-f:prev"
   print_spaces $SCREEN_COLS
   tput sgr0
 }
@@ -162,26 +162,26 @@ function nicodo() {
   show_page $query $current_page
   while IFS= read -r -n1 -s char; do
     case $char in
-      j)
+      'j'|$'\cn')
         if [[ $cursor_pos -le `expr $MAX_LINE - $LINES_PER_CONTENT` ]]; then
           # Move cursor down if not cursor on bottom
           cursor_pos=`expr $cursor_pos + $LINES_PER_CONTENT`
           tput cud $LINES_PER_CONTENT
         fi
         ;;
-      k)
+      'k'|$'\cp')
         if [[ $cursor_pos -gt $TOP_LINE ]]; then
           # Move cursor up if not cursor on top
           cursor_pos=`expr $cursor_pos - $LINES_PER_CONTENT`
           tput cuu $LINES_PER_CONTENT
         fi
         ;;
-      l)
+      'l'|$'\cb')
         current_page=`expr $current_page + 1`
         cursor_pos=0
         show_page $query $current_page
         ;;
-      h)
+      'h'|$'\cf')
         if [[ $current_page -gt 0 ]]; then
           current_page=`expr $current_page - 1`
           cursor_pos=0
