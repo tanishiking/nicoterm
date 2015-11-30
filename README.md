@@ -1,6 +1,8 @@
 # nicoterm
 Search niconico video from your terminal!
 
+[niconico コンテンツ検索API](http://search.nicovideo.jp/docs/api/search.html)
+
 [![https://gyazo.com/c4828651673a270fcb598f2df1171da1](https://i.gyazo.com/c4828651673a270fcb598f2df1171da1.gif)](https://gyazo.com/c4828651673a270fcb598f2df1171da1)
 
 ## Requirements
