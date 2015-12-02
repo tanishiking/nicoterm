@@ -79,7 +79,7 @@ function show_footer() {
   print_spaces $SCREEN_COLS
   printf "\n"
   tput setab 3
-  printf " o:open_video q:quit j|C-n:down k|C-p:up l|C-b:next h|C-f:prev"
+  printf " o|enter:browse q:quit j|C-n:down k|C-p:up l|C-b:next h|C-f:prev"
   print_spaces $SCREEN_COLS
   tput sgr0
 }
@@ -161,27 +161,31 @@ function nicodo() {
   tput reset
   show_page $query $current_page
   while IFS= read -r -n1 -s char; do
+    if [[ $char == $'\x1b' ]]; then
+      read -n2 -s rest
+      char+="$rest"
+    fi
     case $char in
-      'j'|$'\cn')
+      j|$'\cn'|$'\x1b\x5b\x42')
         if [[ $cursor_pos -le `expr $MAX_LINE - $LINES_PER_CONTENT` ]]; then
           # Move cursor down if not cursor on bottom
           cursor_pos=`expr $cursor_pos + $LINES_PER_CONTENT`
           tput cud $LINES_PER_CONTENT
         fi
         ;;
-      'k'|$'\cp')
+      k|$'\cp'|$'\x1b\x5b\x41')
         if [[ $cursor_pos -gt $TOP_LINE ]]; then
           # Move cursor up if not cursor on top
           cursor_pos=`expr $cursor_pos - $LINES_PER_CONTENT`
           tput cuu $LINES_PER_CONTENT
         fi
         ;;
-      'l'|$'\cb')
+      l|$'\cf'|$'\x1b\x5b\x43')
         current_page=`expr $current_page + 1`
         cursor_pos=0
         show_page $query $current_page
         ;;
-      'h'|$'\cf')
+      h|$'\cb'|$'\x1b\x5b\x44')
         if [[ $current_page -gt 0 ]]; then
           current_page=`expr $current_page - 1`
           cursor_pos=0
@@ -199,7 +203,7 @@ function nicodo() {
         cursor_pos=$MAX_LINE
         tput cup $MAX_LINE 0
         ;;
-      o)
+      o|"")
         content_id=$(echo $json_array | jq -r ".[`expr $cursor_pos / $LINES_PER_CONTENT`] | .contentId")
         url="$NICO_VIDEO_WATCH_URL$content_id"
         open_url $url
