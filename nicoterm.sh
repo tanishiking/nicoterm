@@ -50,10 +50,13 @@ function get_jsonarray() {
 function print_spaces() {
   local num_of_spaces=$1
   local i=0
+  local space=' '
+  local spaces=' '
   while [[ $i -lt $num_of_spaces ]]; do
-    printf ' '
+    spaces=$spaces$space
     i=`expr $i + 1`
   done
+  printf "$spaces"
 }
 
 function show_header() {
