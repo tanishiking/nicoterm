@@ -20,7 +20,7 @@ ORDER_BY_COMMENT='-commentCounter'
 ORDER_BY_DATE='-startTime'
 ORDER=$ORDER_BY_MYLIST
 
-function get_jsonarray() {
+function get_and_print_jsonarray() {
   local offset=$1
   local query=$2
   local request_command content_id description view_counter
@@ -95,7 +95,7 @@ function show_page() {
   printf $DISABLE_WRAP
   show_header
   tput cud1
-  get_jsonarray $offset $query
+  get_and_print_jsonarray $offset $query
   show_footer $current_page $query
   printf $ENABLE_WRAP
   tput cup $TOP_LINE 0
